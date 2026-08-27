@@ -1,0 +1,2 @@
+import { Star } from 'lucide-react'
+export default function Rating({ rating, reviews }) { return <div className="flex items-center gap-1.5 text-sm"><Star className="fill-amber-400 text-amber-400" size={18}/><span className="font-bold text-slate-800">{rating}</span><span className="text-slate-400">({reviews} reviews)</span></div> }
