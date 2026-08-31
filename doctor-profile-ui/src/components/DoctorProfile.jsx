@@ -1,99 +1,151 @@
+import "./DoctorProfile.css";
+
+import {
+  FaHospital,
+  FaLanguage,
+  FaStar,
+  FaMoneyBillWave,
+  FaUserMd,
+  FaCalendarAlt,
+  FaCheckCircle,
+  FaTimesCircle,
+} from "react-icons/fa";
+
 export default function DoctorProfile({ doctor, onBook }) {
   return (
-    <div
-      style={{
-        maxWidth: "800px",
-        margin: "20px auto",
-        padding: "20px",
-        border: "1px solid #ddd",
-        borderRadius: "10px",
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
-      {/* Top Section */}
-      <div
-        style={{
-          display: "flex",
-          gap: "20px",
-          alignItems: "flex-start",
-        }}
-      >
-        {/* Doctor Image */}
-        <img
-          src={doctor.image}
-          alt={doctor.name}
-          width="180"
-          style={{
-            borderRadius: "10px",
-            objectFit: "cover",
-          }}
-        />
+    <div className="profile-container">
+      <div className="profile-card">
 
-        {/* Doctor Details */}
-        <div>
-          <h1>{doctor.name}</h1>
+        {/* Header */}
 
-          <h3>{doctor.specialization}</h3>
+        <div className="profile-header">
 
-          <p>
-            <strong>Qualification:</strong> {doctor.qualification}
-          </p>
+          <img
+            src={doctor.image}
+            alt={doctor.name}
+            className="doctor-image"
+          />
 
-          <p>
-            <strong>Experience:</strong> {doctor.experience}
-          </p>
+          <div className="doctor-info">
 
-          <p>
-            <strong>Hospital:</strong> {doctor.hospital}
-          </p>
+            <h1>{doctor.name}</h1>
 
-          <p>
-            <strong>Languages:</strong> {doctor.languages.join(", ")}
-          </p>
+            <h3>{doctor.specialization}</h3>
 
-          <p>
-            <strong>Consultation Fee:</strong> ₹{doctor.fee}
-          </p>
+            <p className="qualification">
+              {doctor.qualification}
+            </p>
 
-          <p>
-            <strong>Rating:</strong> ⭐ {doctor.rating} ({doctor.reviews} reviews)
-          </p>
+            <div className="rating">
+
+              <FaStar className="star" />
+
+              <span>{doctor.rating}</span>
+
+              <small>({doctor.reviews} Reviews)</small>
+
+            </div>
+
+          </div>
+
         </div>
+
+        {/* Info Cards */}
+
+        <div className="info-grid">
+
+          <div className="info-card">
+            <FaHospital />
+            <div>
+              <h4>Hospital</h4>
+              <p>{doctor.hospital}</p>
+            </div>
+          </div>
+
+          <div className="info-card">
+            <FaUserMd />
+            <div>
+              <h4>Experience</h4>
+              <p>{doctor.experience}</p>
+            </div>
+          </div>
+
+          <div className="info-card">
+            <FaMoneyBillWave />
+            <div>
+              <h4>Consultation Fee</h4>
+              <p>₹{doctor.fee}</p>
+            </div>
+          </div>
+
+          <div className="info-card">
+            <FaLanguage />
+            <div>
+              <h4>Languages</h4>
+              <p>{doctor.languages.join(", ")}</p>
+            </div>
+          </div>
+
+        </div>
+
+        {/* About */}
+
+        <div className="section">
+
+          <h2>About Doctor</h2>
+
+          <p>{doctor.about}</p>
+
+        </div>
+
+        {/* Schedule */}
+
+        <div className="section">
+
+          <h2>
+
+            <FaCalendarAlt />
+
+            Weekly Schedule
+
+          </h2>
+
+          <div className="schedule">
+
+            {doctor.schedule.map((item) => (
+
+              <div
+                className={`schedule-item ${
+                  item.available ? "available" : "unavailable"
+                }`}
+                key={item.day}
+              >
+                <div>
+                  <strong>{item.day}</strong>
+
+                  <p>{item.hours}</p>
+                </div>
+
+                {item.available ? (
+                  <FaCheckCircle />
+                ) : (
+                  <FaTimesCircle />
+                )}
+              </div>
+
+            ))}
+          </div>
+
+        </div>
+
+        <button
+          className="book-btn"
+          onClick={onBook}
+        >
+          📅 Book Appointment
+        </button>
+
       </div>
-
-      {/* About */}
-      <h2>About</h2>
-
-      <p>{doctor.about}</p>
-
-      {/* Schedule */}
-      <h2>Weekly Schedule</h2>
-
-      <ul style={{ listStyle: "none", padding: 0 }}>
-        {doctor.schedule.map((item) => (
-          <li key={item.day} style={{ marginBottom: "8px" }}>
-            <strong>{item.day}</strong> : {item.hours}{" "}
-            {item.available ? "✅" : "❌"}
-          </li>
-        ))}
-      </ul>
-
-      {/* Button */}
-      <button
-        onClick={onBook}
-        style={{
-          marginTop: "20px",
-          padding: "12px 24px",
-          backgroundColor: "#0d6efd",
-          color: "white",
-          border: "none",
-          borderRadius: "6px",
-          cursor: "pointer",
-          fontSize: "16px",
-        }}
-      >
-        Book Appointment
-      </button>
     </div>
   );
 }

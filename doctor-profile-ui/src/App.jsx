@@ -2,8 +2,9 @@ import DoctorProfile from "./components/DoctorProfile";
 import { doctor } from "./data/doctor";
 
 function App() {
+
   const handleBook = () => {
-    alert("Appointment Booked!");
+    alert(`Appointment booked with ${doctor.name}`);
   };
 
   return (
