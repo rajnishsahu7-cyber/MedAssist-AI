@@ -10,12 +10,14 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.112.4",
     "@tailwindcss/vite": "latest",
     "@vitejs/plugin-react": "latest",
     "lucide-react": "latest",
     "react": "latest",
     "react-dom": "latest",
     "react-icons": "^5.7.0",
+    "react-router-dom": "^7.18.3",
     "tailwindcss": "latest",
     "vite": "latest"
   },

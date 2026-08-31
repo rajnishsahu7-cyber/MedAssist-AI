@@ -1,17 +1,21 @@
-import DoctorProfile from "./components/DoctorProfile";
-import { doctor } from "./data/doctor";
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import PatientDashboard from "./pages/PatientDashboard";
+import DoctorDashboard from "./pages/DoctorDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
-
-  const handleBook = () => {
-    alert(`Appointment booked with ${doctor.name}`);
-  };
-
   return (
-    <DoctorProfile
-      doctor={doctor}
-      onBook={handleBook}
-    />
+    <Routes>
+      <Route path="/" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/patient" element={<PatientDashboard />} />
+      <Route path="/doctor" element={<DoctorDashboard />} />
+      <Route path="/admin" element={<AdminDashboard />} />
+    </Routes>
   );
 }
 
