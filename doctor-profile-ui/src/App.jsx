@@ -1,23 +1,15 @@
 import { HeartPulse } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import DoctorProfile from './components/DoctorProfile'
+import { doctor } from './data/doctor'
 
 export default function App() {
-  const [doctor, setDoctor] = useState(null)
-
-  useEffect(() => {
-    fetch('/doctor.json')
-      .then((response) => response.json())
-      .then((data) => setDoctor(data))
-      .catch((error) => console.error(error))
-  }, [])
-
-  if (!doctor) {
-    return <h2>Loading doctor profile...</h2>
+  const handleBook = () => {
+    window.alert(
+      'Booking started for ' +
+        doctor.name +
+        '. Connect this handler to your appointment flow.'
+    )
   }
-
-  const handleBook = () =>
-    window.alert('Booking started for ' + doctor.name + '.')
 
   return (
     <div className="min-h-screen bg-slate-50">
