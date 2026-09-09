@@ -1,34 +1,102 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../supabase/client";
 
 export default function Login() {
+  const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(false);
+
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: form.email,
+        password: form.password,
+      });
+
+      if (error) throw error;
+
+      // Get user role
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", data.user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      alert("Login successful!");
+
+      if (profile.role === "doctor") {
+        navigate("/doctor");
+      } else if (profile.role === "patient") {
+        navigate("/patient");
+      } else {
+        navigate("/admin");
+      }
+
+    } catch (err) {
+      alert(err.message);
+    }
+
+    setLoading(false);
+  };
+
   return (
     <div style={styles.container}>
-      <div style={styles.card}>
+      <form style={styles.card} onSubmit={handleLogin}>
         <h1>🏥 MedAssist</h1>
         <h2>Welcome Back</h2>
 
         <input
           type="email"
+          name="email"
           placeholder="Email"
+          value={form.email}
+          onChange={handleChange}
+          required
           style={styles.input}
         />
 
         <input
           type="password"
+          name="password"
           placeholder="Password"
+          value={form.password}
+          onChange={handleChange}
+          required
           style={styles.input}
         />
 
-        <button style={styles.button}>
-          Login
+        <button
+          type="submit"
+          disabled={loading}
+          style={styles.button}
+        >
+          {loading ? "Logging in..." : "Login"}
         </button>
 
         <p>
           Don't have an account?{" "}
           <Link to="/register">Register</Link>
         </p>
-      </div>
+      </form>
     </div>
   );
 }

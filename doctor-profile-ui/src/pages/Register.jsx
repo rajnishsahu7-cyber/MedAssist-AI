@@ -35,6 +35,9 @@ export default function Register() {
 
       if (error) throw error;
 
+      console.log("User:", data.user);
+      console.log("Session:", data.session);
+
       // Save profile
       const { error: profileError } = await supabase
         .from("profiles")
@@ -47,7 +50,10 @@ export default function Register() {
           },
         ]);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.log(profileError);
+        throw profileError;
+      }
 
       alert("Registration successful!");
 
