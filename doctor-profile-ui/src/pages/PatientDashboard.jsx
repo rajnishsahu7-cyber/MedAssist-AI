@@ -35,6 +35,15 @@ export default function PatientDashboard() {
           <p>Schedule an appointment with a doctor.</p>
         </div>
 
+        {/* My Appointments */}
+        <div
+        Style={styles.card}
+          onClick={() => navigate("/my-appointments")}
+          >
+            <h3>🗓️</h3>
+            <p>View your upcoming and past appointments.</p>
+          </div>
+
         {/* AI Symptom Checker */}
         <div className="card">
           <h3>🩺 AI Symptom Checker</h3>

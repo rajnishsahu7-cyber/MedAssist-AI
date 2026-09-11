@@ -7,6 +7,7 @@ import PatientDashboard from "./pages/PatientDashboard";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import BookAppointment from "./pages/BookAppointment";
+import MyAppointments from "./pages/MyAppointments";
 
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
@@ -54,6 +55,16 @@ function App() {
         element={
           <RoleProtectedRoute role="patient">
             <BookAppointment />
+          </RoleProtectedRoute>
+        }
+      />
+
+      {/* My Appointments */}
+      <Route
+        path="/my-appointments"
+        element={
+          <RoleProtectedRoute role="patient">
+            <MyAppointments />
           </RoleProtectedRoute>
         }
       />
