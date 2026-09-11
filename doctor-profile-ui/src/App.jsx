@@ -8,6 +8,8 @@ import DoctorDashboard from "./pages/DoctorDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import BookAppointment from "./pages/BookAppointment";
 import MyAppointments from "./pages/MyAppointments";
+import DoctorSearch from "./pages/DoctorSearch";
+import DoctorProfile from "./pages/DoctorProfile";
 
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
@@ -65,6 +67,26 @@ function App() {
         element={
           <RoleProtectedRoute role="patient">
             <MyAppointments />
+          </RoleProtectedRoute>
+        }
+      />
+
+      {/* Doctor Search */}
+      <Route
+        path="/doctor-search"
+        element={
+          <RoleProtectedRoute role="patient">
+            <DoctorSearch />
+          </RoleProtectedRoute>
+        }
+      />
+
+      {/* Doctor Profile */}
+      <Route
+        path="/doctor-profile/:doctorId"
+        element={
+          <RoleProtectedRoute role="patient">
+            <DoctorProfile />
           </RoleProtectedRoute>
         }
       />

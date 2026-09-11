@@ -11,6 +11,7 @@ export default function PatientDashboard() {
 
   return (
     <div style={styles.container}>
+      {/* Header */}
       <header style={styles.header}>
         <h2>🏥 MedAssist</h2>
 
@@ -22,11 +23,24 @@ export default function PatientDashboard() {
         </button>
       </header>
 
+      {/* Welcome */}
       <h3 style={styles.welcome}>
         Welcome Patient 👋
       </h3>
 
+      {/* Dashboard Cards */}
       <div style={styles.grid}>
+
+        {/* Find a Doctor */}
+        <div
+          style={styles.card}
+          onClick={() => navigate("/doctor-search")}
+        >
+          <h3>🔎 Find a Doctor</h3>
+          <p>
+            Search doctors and view their profiles.
+          </p>
+        </div>
 
         {/* Book Appointment */}
         <div
@@ -34,7 +48,9 @@ export default function PatientDashboard() {
           onClick={() => navigate("/book")}
         >
           <h3>📅 Book Appointment</h3>
-          <p>Schedule an appointment with a doctor.</p>
+          <p>
+            Schedule an appointment with a doctor.
+          </p>
         </div>
 
         {/* My Appointments */}
@@ -43,25 +59,33 @@ export default function PatientDashboard() {
           onClick={() => navigate("/my-appointments")}
         >
           <h3>📋 My Appointments</h3>
-          <p>View your upcoming and previous appointments.</p>
+          <p>
+            View your upcoming and previous appointments.
+          </p>
         </div>
 
         {/* AI Symptom Checker */}
         <div style={styles.card}>
           <h3>🩺 AI Symptom Checker</h3>
-          <p>Describe your symptoms and get AI suggestions.</p>
+          <p>
+            Describe your symptoms and get AI suggestions.
+          </p>
         </div>
 
         {/* Medical Records */}
         <div style={styles.card}>
           <h3>📁 Medical Records</h3>
-          <p>View prescriptions and reports.</p>
+          <p>
+            View prescriptions and reports.
+          </p>
         </div>
 
         {/* Chat with Doctor */}
         <div style={styles.card}>
           <h3>💬 Chat with Doctor</h3>
-          <p>Consult your doctor securely.</p>
+          <p>
+            Consult your doctor securely.
+          </p>
         </div>
 
       </div>
