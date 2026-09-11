@@ -1,13 +1,57 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabase/client";
 
-export default function PatientDashboard() {
+export default function MyAppointments() {
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/");
-  };
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadAppointments();
+  }, []);
+
+  async function loadAppointments() {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        navigate("/login");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("appointments")
+        .select(`
+          id,
+          appointment_date,
+          appointment_time,
+          status,
+          doctor_id,
+          profiles:doctor_id (
+            full_name
+          )
+        `)
+        .eq("patient_id", session.user.id)
+        .order("appointment_date", { ascending: true });
+
+      if (error) {
+        console.error("Appointment error:", error);
+        return;
+      }
+
+      console.log("My Appointments:", data);
+
+      setAppointments(data || []);
+    } catch (error) {
+      console.error("Unexpected error:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div style={styles.container}>
@@ -15,66 +59,60 @@ export default function PatientDashboard() {
         <h2>🏥 MedAssist</h2>
 
         <button
-          onClick={handleLogout}
-          style={styles.logout}
+          onClick={() => navigate("/patient")}
+          style={styles.backButton}
         >
-          Logout
+          ← Back to Dashboard
         </button>
       </header>
 
-      <h3 style={styles.welcome}>
-        Welcome Patient 👋
-      </h3>
+      <h2>📅 My Appointments</h2>
 
-      <div style={styles.grid}>
+      {loading && <p>Loading appointments...</p>}
 
-        {/* Book Appointment */}
-        <div
-          style={styles.card}
-          onClick={() => navigate("/book")}
-        >
-          <h3>📅 Book Appointment</h3>
-          <p>
-            Schedule an appointment with a doctor.
-          </p>
+      {!loading && appointments.length === 0 && (
+        <div style={styles.empty}>
+          <h3>No appointments found</h3>
+          <p>You haven't booked any appointments yet.</p>
+
+          <button
+            onClick={() => navigate("/book")}
+            style={styles.bookButton}
+          >
+            Book an Appointment
+          </button>
         </div>
+      )}
 
-        {/* My Appointments */}
-        <div
-          style={styles.card}
-          onClick={() => navigate("/my-appointments")}
-        >
-          <h3>📋 My Appointments</h3>
-          <p>
-            View your upcoming and previous appointments.
-          </p>
+      {!loading && appointments.length > 0 && (
+        <div style={styles.list}>
+          {appointments.map((appointment) => (
+            <div key={appointment.id} style={styles.card}>
+              <h3>
+                🩺 Dr.{" "}
+                {appointment.profiles?.full_name || "Unknown Doctor"}
+              </h3>
+
+              <p>
+                <strong>📅 Date:</strong>{" "}
+                {appointment.appointment_date}
+              </p>
+
+              <p>
+                <strong>⏰ Time:</strong>{" "}
+                {appointment.appointment_time}
+              </p>
+
+              <p>
+                <strong>Status:</strong>{" "}
+                <span style={styles.status}>
+                  {appointment.status}
+                </span>
+              </p>
+            </div>
+          ))}
         </div>
-
-        {/* AI Symptom Checker */}
-        <div style={styles.card}>
-          <h3>🩺 AI Symptom Checker</h3>
-          <p>
-            Describe your symptoms and get AI suggestions.
-          </p>
-        </div>
-
-        {/* Medical Records */}
-        <div style={styles.card}>
-          <h3>📁 Medical Records</h3>
-          <p>
-            View prescriptions and reports.
-          </p>
-        </div>
-
-        {/* Chat with Doctor */}
-        <div style={styles.card}>
-          <h3>💬 Chat with Doctor</h3>
-          <p>
-            Consult your doctor securely.
-          </p>
-        </div>
-
-      </div>
+      )}
     </div>
   );
 }
@@ -90,33 +128,55 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "40px",
+    marginBottom: "30px",
   },
 
-  welcome: {
-    marginBottom: "25px",
-  },
-
-  logout: {
-    background: "#dc2626",
+  backButton: {
+    background: "#374151",
     color: "#fff",
     border: "none",
-    padding: "10px 20px",
+    padding: "10px 18px",
     borderRadius: "8px",
     cursor: "pointer",
   },
 
-  grid: {
+  list: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-    gap: "25px",
+    gap: "20px",
+    marginTop: "25px",
+    maxWidth: "700px",
   },
 
   card: {
     background: "#fff",
     padding: "25px",
     borderRadius: "15px",
-    boxShadow: "0 8px 25px rgba(0, 0, 0, 0.08)",
+    boxShadow: "0 8px 25px rgba(0,0,0,.08)",
+  },
+
+  status: {
+    background: "#fef3c7",
+    color: "#92400e",
+    padding: "5px 10px",
+    borderRadius: "20px",
+    fontWeight: "bold",
+  },
+
+  empty: {
+    background: "#fff",
+    padding: "30px",
+    borderRadius: "15px",
+    marginTop: "25px",
+    maxWidth: "600px",
+  },
+
+  bookButton: {
+    background: "#2563eb",
+    color: "#fff",
+    border: "none",
+    padding: "12px 20px",
+    borderRadius: "8px",
     cursor: "pointer",
+    marginTop: "10px",
   },
 };
