@@ -304,6 +304,12 @@ export default function DoctorDashboard() {
         appointment.status === "Rejected"
     ).length;
 
+  const completedAppointments =
+    appointments.filter(
+      (appointment) =>
+        appointment.status === "Completed"
+    ).length;
+
   // =====================================================
   // FILTER APPOINTMENTS
   // =====================================================
@@ -399,6 +405,7 @@ export default function DoctorDashboard() {
 
       <div style={styles.summaryGrid}>
 
+        {/* Total */}
         <div style={styles.summaryCard}>
           <h3>📋 Total</h3>
 
@@ -409,6 +416,7 @@ export default function DoctorDashboard() {
           <p>Appointments</p>
         </div>
 
+        {/* Pending */}
         <div style={styles.summaryCard}>
           <h3>⏳ Pending</h3>
 
@@ -419,6 +427,7 @@ export default function DoctorDashboard() {
           <p>Waiting for action</p>
         </div>
 
+        {/* Accepted */}
         <div style={styles.summaryCard}>
           <h3>✅ Accepted</h3>
 
@@ -429,6 +438,7 @@ export default function DoctorDashboard() {
           <p>Confirmed appointments</p>
         </div>
 
+        {/* Rejected */}
         <div style={styles.summaryCard}>
           <h3>❌ Rejected</h3>
 
@@ -437,6 +447,17 @@ export default function DoctorDashboard() {
           </h1>
 
           <p>Rejected appointments</p>
+        </div>
+
+        {/* Completed */}
+        <div style={styles.summaryCard}>
+          <h3>🏁 Completed</h3>
+
+          <h1 style={styles.completedNumber}>
+            {completedAppointments}
+          </h1>
+
+          <p>Completed appointments</p>
         </div>
 
       </div>
@@ -553,6 +574,7 @@ export default function DoctorDashboard() {
         {/* Filters */}
         <div style={styles.filterContainer}>
 
+          {/* All */}
           <button
             onClick={() => setFilter("All")}
             style={
@@ -564,6 +586,7 @@ export default function DoctorDashboard() {
             📋 All
           </button>
 
+          {/* Pending */}
           <button
             onClick={() => setFilter("Pending")}
             style={
@@ -575,6 +598,7 @@ export default function DoctorDashboard() {
             ⏳ Pending
           </button>
 
+          {/* Accepted */}
           <button
             onClick={() => setFilter("Accepted")}
             style={
@@ -586,6 +610,7 @@ export default function DoctorDashboard() {
             ✅ Accepted
           </button>
 
+          {/* Rejected */}
           <button
             onClick={() => setFilter("Rejected")}
             style={
@@ -595,6 +620,18 @@ export default function DoctorDashboard() {
             }
           >
             ❌ Rejected
+          </button>
+
+          {/* Completed */}
+          <button
+            onClick={() => setFilter("Completed")}
+            style={
+              filter === "Completed"
+                ? styles.activeFilter
+                : styles.filterButton
+            }
+          >
+            🏁 Completed
           </button>
 
         </div>
@@ -666,6 +703,12 @@ export default function DoctorDashboard() {
                           : appointment.status ===
                             "Rejected"
                           ? styles.rejectedStatus
+                          : appointment.status ===
+                            "Completed"
+                          ? styles.completedStatus
+                          : appointment.status ===
+                            "Cancelled"
+                          ? styles.cancelledStatus
                           : styles.pendingStatus
                       }
                     >
@@ -713,6 +756,32 @@ export default function DoctorDashboard() {
                     </div>
                   )}
 
+                  {/* Mark Completed */}
+                  {appointment.status ===
+                    "Accepted" && (
+                    <div
+                      style={
+                        styles.buttonContainer
+                      }
+                    >
+
+                      <button
+                        onClick={() =>
+                          updateAppointmentStatus(
+                            appointment.id,
+                            "Completed"
+                          )
+                        }
+                        style={
+                          styles.completeButton
+                        }
+                      >
+                        🏁 Mark Completed
+                      </button>
+
+                    </div>
+                  )}
+
                 </div>
               )
             )}
@@ -720,6 +789,22 @@ export default function DoctorDashboard() {
           </div>
         )}
 
+      </div>
+
+      {/* Doctor Medical Records */}
+      <div style={styles.medicalRecordsSection}>
+        <h2>📁 Medical Records</h2>
+
+        <p style={styles.availabilityDescription}>
+          Create and manage medical records for your patients.
+        </p>
+
+        <button
+          onClick={() => navigate("/medical-records")}
+          style={styles.medicalRecordsButton}
+        >
+          📝 Manage Medical Records
+        </button>
       </div>
 
     </div>
@@ -782,6 +867,11 @@ const styles = {
   },
 
   rejectedNumber: {
+    fontSize: "32px",
+    margin: "10px 0",
+  },
+
+  completedNumber: {
     fontSize: "32px",
     margin: "10px 0",
   },
@@ -928,6 +1018,22 @@ const styles = {
     fontWeight: "bold",
   },
 
+  completedStatus: {
+    background: "#dbeafe",
+    color: "#1d4ed8",
+    padding: "5px 10px",
+    borderRadius: "20px",
+    fontWeight: "bold",
+  },
+
+  cancelledStatus: {
+    background: "#f3f4f6",
+    color: "#4b5563",
+    padding: "5px 10px",
+    borderRadius: "20px",
+    fontWeight: "bold",
+  },
+
   // =====================================================
   // APPOINTMENT BUTTONS
   // =====================================================
@@ -958,6 +1064,16 @@ const styles = {
     fontWeight: "bold",
   },
 
+  completeButton: {
+    background: "#2563eb",
+    color: "#fff",
+    border: "none",
+    padding: "10px 18px",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  },
+
   empty: {
     background: "#fff",
     padding: "30px",
@@ -972,5 +1088,24 @@ const styles = {
     padding: "10px 20px",
     borderRadius: "8px",
     cursor: "pointer",
+  },
+
+  // =====================================================
+  // MEDICAL RECORDS
+  // =====================================================
+
+  medicalRecordsSection: {
+    marginTop: "50px",
+    marginBottom: "40px",
+  },
+
+  medicalRecordsButton: {
+    background: "#7c3aed",
+    color: "#fff",
+    border: "none",
+    padding: "12px 22px",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontWeight: "bold",
   },
 };
