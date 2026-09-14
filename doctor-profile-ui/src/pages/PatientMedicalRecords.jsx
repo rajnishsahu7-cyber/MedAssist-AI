@@ -1,236 +1,360 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import { supabase } from "../supabase/client";
 
-export default function PatientMedicalRecords() {
-  const navigate = useNavigate();
-
+function PatientMedicalRecords() {
   const [records, setRecords] = useState([]);
+  const [prescriptions, setPrescriptions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    loadMedicalRecords();
+    loadPatientData();
   }, []);
 
-  async function loadMedicalRecords() {
+  const loadPatientData = async () => {
     setLoading(true);
+    setError("");
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-    if (!session) {
-      navigate("/");
-      return;
-    }
+      if (!session) {
+        setError("You are not logged in.");
+        setLoading(false);
+        return;
+      }
 
-    const { data, error } = await supabase
-      .from("medical_records")
-      .select(`
-        id,
-        record_type,
-        title,
-        description,
-        record_date,
-        created_at,
-        doctor_id,
-        profiles:doctor_id (
-          full_name,
-          email
-        )
-      `)
-      .eq("patient_id", session.user.id)
-      .order("record_date", { ascending: false });
+      const patientId = session.user.id;
 
-    if (error) {
-      console.error(
-        "Medical records loading error:",
-        error
-      );
+      // Load medical records
+      const { data: recordData, error: recordError } = await supabase
+        .from("medical_records")
+        .select(`
+          id,
+          record_type,
+          title,
+          description,
+          record_date,
+          created_at,
+          doctor_id,
+          profiles:doctor_id (
+            full_name,
+            email
+          )
+        `)
+        .eq("patient_id", patientId)
+        .order("record_date", { ascending: false });
 
-      alert(error.message);
+      if (recordError) {
+        throw recordError;
+      }
+
+      // Load prescriptions
+      const { data: prescriptionData, error: prescriptionError } =
+        await supabase
+          .from("prescriptions")
+          .select(`
+            id,
+            medicine_name,
+            dosage,
+            frequency,
+            duration,
+            instructions,
+            prescription_date,
+            created_at,
+            doctor_id,
+            profiles:doctor_id (
+              full_name,
+              email
+            )
+          `)
+          .eq("patient_id", patientId)
+          .order("prescription_date", { ascending: false });
+
+      if (prescriptionError) {
+        throw prescriptionError;
+      }
+
+      setRecords(recordData || []);
+      setPrescriptions(prescriptionData || []);
+    } catch (err) {
+      console.error("Error loading medical data:", err);
+      setError(err.message || "Unable to load medical records.");
+    } finally {
       setLoading(false);
-      return;
     }
+  };
 
-    console.log("Patient Medical Records:", data);
-
-    setRecords(data || []);
-    setLoading(false);
+  if (loading) {
+    return (
+      <div style={styles.page}>
+        <div style={styles.container}>
+          <h2>📁 Medical Records</h2>
+          <p>Loading your medical records...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div style={styles.container}>
+    <div style={styles.page}>
+      <div style={styles.container}>
+        <h1 style={styles.heading}>📁 My Medical Records</h1>
 
-      {/* Header */}
-      <header style={styles.header}>
-        <h2>🏥 MedAssist</h2>
+        {error && (
+          <div style={styles.error}>
+            <strong>Error:</strong> {error}
+          </div>
+        )}
 
-        <button
-          onClick={() => navigate("/patient")}
-          style={styles.backButton}
-        >
-          ← Patient Dashboard
-        </button>
-      </header>
+        {/* ================= MEDICAL RECORDS ================= */}
 
-      {/* Page title */}
-      <h1>📁 My Medical Records</h1>
+        <section style={styles.section}>
+          <h2 style={styles.sectionTitle}>📋 Medical Records</h2>
 
-      <p style={styles.subtitle}>
-        View your medical history, reports, diagnoses,
-        prescriptions, and doctor notes.
-      </p>
-
-      {/* Records */}
-      {loading ? (
-        <p>Loading medical records...</p>
-      ) : records.length === 0 ? (
-        <div style={styles.empty}>
-          <h3>No medical records found</h3>
-
-          <p>
-            Your medical records will appear here when
-            your doctor adds them.
-          </p>
-        </div>
-      ) : (
-        <div style={styles.list}>
-
-          {records.map((record) => (
-            <div
-              key={record.id}
-              style={styles.card}
-            >
-
-              {/* Record header */}
-              <div style={styles.cardHeader}>
-
-                <div>
-                  <h2>
-                    📄 {record.title}
-                  </h2>
-
-                  <span
-                    style={styles.typeBadge}
-                  >
-                    {record.record_type}
-                  </span>
-                </div>
-
-              </div>
-
-              {/* Doctor */}
-              <p>
-                <strong>👨‍⚕️ Doctor:</strong>{" "}
-                Dr.{" "}
-                {record.profiles?.full_name ||
-                  "Unknown Doctor"}
-              </p>
-
-              {/* Doctor email */}
-              <p>
-                <strong>Email:</strong>{" "}
-                {record.profiles?.email ||
-                  "Not available"}
-              </p>
-
-              {/* Record date */}
-              <p>
-                <strong>📅 Record Date:</strong>{" "}
-                {record.record_date}
-              </p>
-
-              {/* Description */}
-              <div style={styles.description}>
-                <strong>📝 Notes:</strong>
-
-                <p>
-                  {record.description ||
-                    "No additional notes."}
-                </p>
-              </div>
-
+          {records.length === 0 ? (
+            <div style={styles.emptyCard}>
+              <p>No medical records available yet.</p>
             </div>
-          ))}
+          ) : (
+            <div style={styles.grid}>
+              {records.map((record) => (
+                <div key={record.id} style={styles.card}>
+                  <div style={styles.cardHeader}>
+                    <h3 style={styles.cardTitle}>{record.title}</h3>
 
-        </div>
-      )}
+                    <span style={styles.badge}>
+                      {record.record_type}
+                    </span>
+                  </div>
 
+                  <p>
+                    <strong>Doctor:</strong>{" "}
+                    {record.profiles?.full_name || "Unknown"}
+                  </p>
+
+                  {record.profiles?.email && (
+                    <p>
+                      <strong>Email:</strong> {record.profiles.email}
+                    </p>
+                  )}
+
+                  <p>
+                    <strong>Record Date:</strong>{" "}
+                    {record.record_date}
+                  </p>
+
+                  {record.description && (
+                    <div style={styles.notes}>
+                      <strong>Notes:</strong>
+                      <p>{record.description}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* ================= PRESCRIPTIONS ================= */}
+
+        <section style={styles.section}>
+          <h2 style={styles.sectionTitle}>💊 My Prescriptions</h2>
+
+          {prescriptions.length === 0 ? (
+            <div style={styles.emptyCard}>
+              <p>No prescriptions available yet.</p>
+            </div>
+          ) : (
+            <div style={styles.grid}>
+              {prescriptions.map((prescription) => (
+                <div key={prescription.id} style={styles.prescriptionCard}>
+                  <div style={styles.cardHeader}>
+                    <h3 style={styles.cardTitle}>
+                      💊 {prescription.medicine_name}
+                    </h3>
+
+                    <span style={styles.prescriptionBadge}>
+                      Prescription
+                    </span>
+                  </div>
+
+                  <div style={styles.infoRow}>
+                    <strong>Dosage:</strong>
+                    <span>{prescription.dosage}</span>
+                  </div>
+
+                  <div style={styles.infoRow}>
+                    <strong>Frequency:</strong>
+                    <span>{prescription.frequency}</span>
+                  </div>
+
+                  <div style={styles.infoRow}>
+                    <strong>Duration:</strong>
+                    <span>{prescription.duration}</span>
+                  </div>
+
+                  {prescription.instructions && (
+                    <div style={styles.instructions}>
+                      <strong>Instructions:</strong>
+                      <p>{prescription.instructions}</p>
+                    </div>
+                  )}
+
+                  <hr style={styles.divider} />
+
+                  <p>
+                    <strong>Doctor:</strong>{" "}
+                    {prescription.profiles?.full_name || "Unknown"}
+                  </p>
+
+                  {prescription.profiles?.email && (
+                    <p>
+                      <strong>Doctor Email:</strong>{" "}
+                      {prescription.profiles.email}
+                    </p>
+                  )}
+
+                  <p>
+                    <strong>Prescription Date:</strong>{" "}
+                    {prescription.prescription_date}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
 
 const styles = {
-  container: {
-    padding: "30px",
-    background: "#f5f7fb",
+  page: {
     minHeight: "100vh",
+    backgroundColor: "#f5f7fb",
+    padding: "30px 20px",
   },
 
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
+  container: {
+    maxWidth: "1100px",
+    margin: "0 auto",
+  },
+
+  heading: {
     marginBottom: "30px",
+    color: "#1f2937",
   },
 
-  subtitle: {
-    color: "#6b7280",
-    marginBottom: "30px",
-    maxWidth: "700px",
+  section: {
+    marginBottom: "40px",
   },
 
-  list: {
+  sectionTitle: {
+    marginBottom: "20px",
+    color: "#1f2937",
+  },
+
+  grid: {
     display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
     gap: "20px",
-    maxWidth: "750px",
-    marginTop: "25px",
   },
 
   card: {
-    background: "#fff",
-    padding: "25px",
-    borderRadius: "15px",
-    boxShadow:
-      "0 8px 25px rgba(0, 0, 0, 0.08)",
+    backgroundColor: "#ffffff",
+    borderRadius: "12px",
+    padding: "20px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+    border: "1px solid #e5e7eb",
+  },
+
+  prescriptionCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: "12px",
+    padding: "20px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+    border: "1px solid #e5e7eb",
   },
 
   cardHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: "10px",
+    marginBottom: "15px",
+  },
+
+  cardTitle: {
+    margin: 0,
+    color: "#111827",
+  },
+
+  badge: {
+    backgroundColor: "#e0f2fe",
+    color: "#0369a1",
+    padding: "5px 10px",
+    borderRadius: "20px",
+    fontSize: "12px",
+    fontWeight: "600",
+    whiteSpace: "nowrap",
+  },
+
+  prescriptionBadge: {
+    backgroundColor: "#dcfce7",
+    color: "#166534",
+    padding: "5px 10px",
+    borderRadius: "20px",
+    fontSize: "12px",
+    fontWeight: "600",
+    whiteSpace: "nowrap",
+  },
+
+  infoRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    gap: "15px",
+    padding: "8px 0",
+    borderBottom: "1px solid #f1f5f9",
+  },
+
+  notes: {
+    marginTop: "15px",
+    padding: "12px",
+    backgroundColor: "#f8fafc",
+    borderRadius: "8px",
+  },
+
+  instructions: {
+    marginTop: "15px",
+    padding: "12px",
+    backgroundColor: "#f8fafc",
+    borderRadius: "8px",
+  },
+
+  divider: {
+    border: "none",
+    borderTop: "1px solid #e5e7eb",
+    margin: "18px 0",
+  },
+
+  emptyCard: {
+    backgroundColor: "#ffffff",
+    padding: "25px",
+    borderRadius: "12px",
+    border: "1px solid #e5e7eb",
+    color: "#6b7280",
+  },
+
+  error: {
+    backgroundColor: "#fee2e2",
+    color: "#991b1b",
+    padding: "15px",
+    borderRadius: "8px",
     marginBottom: "20px",
   },
-
-  typeBadge: {
-    display: "inline-block",
-    background: "#dbeafe",
-    color: "#1d4ed8",
-    padding: "6px 12px",
-    borderRadius: "20px",
-    fontWeight: "bold",
-    fontSize: "14px",
-  },
-
-  description: {
-    background: "#f9fafb",
-    padding: "15px",
-    borderRadius: "10px",
-    marginTop: "20px",
-  },
-
-  empty: {
-    background: "#fff",
-    padding: "30px",
-    borderRadius: "15px",
-    maxWidth: "600px",
-    marginTop: "25px",
-  },
-
-  backButton: {
-    background: "#374151",
-    color: "#fff",
-    border: "none",
-    padding: "10px 18px",
-    borderRadius: "8px",
-    cursor: "pointer",
-  },
 };
+
+export default PatientMedicalRecords;

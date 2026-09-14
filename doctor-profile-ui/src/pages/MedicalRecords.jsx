@@ -13,14 +13,32 @@ export default function MedicalRecords() {
   const [description, setDescription] = useState("");
   const [recordDate, setRecordDate] = useState("");
 
+  // Prescription fields
+  const [appointments, setAppointments] = useState([]);
+  const [appointmentId, setAppointmentId] = useState("");
+  const [medicineName, setMedicineName] = useState("");
+  const [dosage, setDosage] = useState("");
+  const [frequency, setFrequency] = useState("");
+  const [duration, setDuration] = useState("");
+  const [instructions, setInstructions] = useState("");
+  const [prescriptionDate, setPrescriptionDate] = useState("");
+
   const [loading, setLoading] = useState(true);
+  const [loadingAppointments, setLoadingAppointments] =
+    useState(false);
+
   const [saving, setSaving] = useState(false);
+  const [savingPrescription, setSavingPrescription] =
+    useState(false);
 
   useEffect(() => {
     loadPatients();
   }, []);
 
-  // Load patients who have appointments with this doctor
+  // =====================================================
+  // LOAD PATIENTS
+  // =====================================================
+
   async function loadPatients() {
     setLoading(true);
 
@@ -72,7 +90,71 @@ export default function MedicalRecords() {
     setLoading(false);
   }
 
-  // Save medical record
+  // =====================================================
+  // LOAD PATIENT APPOINTMENTS
+  // =====================================================
+
+  async function loadPatientAppointments(selectedPatientId) {
+    if (!selectedPatientId) {
+      setAppointments([]);
+      setAppointmentId("");
+      return;
+    }
+
+    setLoadingAppointments(true);
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      navigate("/");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("appointments")
+      .select(`
+        id,
+        appointment_date,
+        appointment_time,
+        status
+      `)
+      .eq("doctor_id", session.user.id)
+      .eq("patient_id", selectedPatientId)
+      .order("appointment_date", {
+        ascending: false,
+      });
+
+    if (error) {
+      console.error(
+        "Appointment loading error:",
+        error
+      );
+
+      alert(error.message);
+      setLoadingAppointments(false);
+      return;
+    }
+
+    setAppointments(data || []);
+    setAppointmentId("");
+    setLoadingAppointments(false);
+  }
+
+  // =====================================================
+  // SELECT PATIENT
+  // =====================================================
+
+  function handlePatientChange(value) {
+    setPatientId(value);
+    loadPatientAppointments(value);
+  }
+
+  // =====================================================
+  // SAVE MEDICAL RECORD
+  // =====================================================
+
   async function saveMedicalRecord() {
     if (!patientId) {
       alert("Please select a patient.");
@@ -120,7 +202,11 @@ export default function MedicalRecords() {
       ]);
 
     if (error) {
-      console.error("Medical record error:", error);
+      console.error(
+        "Medical record error:",
+        error
+      );
+
       alert(error.message);
       setSaving(false);
       return;
@@ -135,7 +221,98 @@ export default function MedicalRecords() {
     setDescription("");
     setRecordDate("");
 
+    setAppointments([]);
+    setAppointmentId("");
+
     setSaving(false);
+  }
+
+  // =====================================================
+  // SAVE PRESCRIPTION
+  // =====================================================
+
+  async function savePrescription() {
+    if (!patientId) {
+      alert("Please select a patient.");
+      return;
+    }
+
+    if (!medicineName.trim()) {
+      alert("Please enter the medicine name.");
+      return;
+    }
+
+    if (!dosage.trim()) {
+      alert("Please enter the dosage.");
+      return;
+    }
+
+    if (!frequency.trim()) {
+      alert("Please enter the frequency.");
+      return;
+    }
+
+    if (!duration.trim()) {
+      alert("Please enter the duration.");
+      return;
+    }
+
+    if (!prescriptionDate) {
+      alert("Please select the prescription date.");
+      return;
+    }
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      alert("Please login.");
+      navigate("/");
+      return;
+    }
+
+    setSavingPrescription(true);
+
+    const { error } = await supabase
+      .from("prescriptions")
+      .insert([
+        {
+          patient_id: patientId,
+          doctor_id: session.user.id,
+          appointment_id: appointmentId || null,
+          medicine_name: medicineName.trim(),
+          dosage: dosage.trim(),
+          frequency: frequency.trim(),
+          duration: duration.trim(),
+          instructions: instructions.trim(),
+          prescription_date: prescriptionDate,
+        },
+      ]);
+
+    if (error) {
+      console.error(
+        "Prescription error:",
+        error
+      );
+
+      alert(error.message);
+      setSavingPrescription(false);
+      return;
+    }
+
+    alert("Prescription added successfully!");
+
+    // Clear prescription form
+    setAppointmentId("");
+    setMedicineName("");
+    setDosage("");
+    setFrequency("");
+    setDuration("");
+    setInstructions("");
+    setPrescriptionDate("");
+
+    setSavingPrescription(false);
   }
 
   return (
@@ -157,11 +334,14 @@ export default function MedicalRecords() {
       <h1>📁 Medical Records</h1>
 
       <p style={styles.subtitle}>
-        Create and manage medical records for your
-        patients.
+        Create medical records and prescriptions for
+        your patients.
       </p>
 
-      {/* Form */}
+      {/* =================================================
+          MEDICAL RECORD FORM
+      ================================================= */}
+
       <div style={styles.form}>
 
         <h2>➕ Add Medical Record</h2>
@@ -187,7 +367,7 @@ export default function MedicalRecords() {
           <select
             value={patientId}
             onChange={(e) =>
-              setPatientId(e.target.value)
+              handlePatientChange(e.target.value)
             }
             style={styles.input}
           >
@@ -293,15 +473,214 @@ export default function MedicalRecords() {
           style={styles.input}
         />
 
-        {/* Save Button */}
+        {/* Save Medical Record */}
         <button
           onClick={saveMedicalRecord}
-          disabled={saving || patients.length === 0}
+          disabled={
+            saving ||
+            patients.length === 0
+          }
           style={styles.saveButton}
         >
           {saving
             ? "Saving..."
             : "💾 Save Medical Record"}
+        </button>
+
+      </div>
+
+      {/* =================================================
+          PRESCRIPTION FORM
+      ================================================= */}
+
+      <div style={styles.form}>
+
+        <h2>💊 Add Prescription</h2>
+
+        {/* Patient */}
+        <label>
+          <strong>Patient</strong>
+        </label>
+
+        <select
+          value={patientId}
+          onChange={(e) =>
+            handlePatientChange(e.target.value)
+          }
+          style={styles.input}
+        >
+          <option value="">
+            Select Patient
+          </option>
+
+          {patients.map((patient) => (
+            <option
+              key={patient.id}
+              value={patient.id}
+            >
+              {patient.full_name} -{" "}
+              {patient.email}
+            </option>
+          ))}
+        </select>
+
+        {/* Appointment */}
+        <label>
+          <strong>
+            Appointment (Optional)
+          </strong>
+        </label>
+
+        {loadingAppointments ? (
+          <p>Loading appointments...</p>
+        ) : (
+          <select
+            value={appointmentId}
+            onChange={(e) =>
+              setAppointmentId(e.target.value)
+            }
+            style={styles.input}
+            disabled={!patientId}
+          >
+            <option value="">
+              Select Appointment
+            </option>
+
+            {appointments.map((appointment) => (
+              <option
+                key={appointment.id}
+                value={appointment.id}
+              >
+                {appointment.appointment_date} -{" "}
+                {appointment.appointment_time} -{" "}
+                {appointment.status}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {/* Medicine */}
+        <label>
+          <strong>Medicine Name</strong>
+        </label>
+
+        <input
+          type="text"
+          placeholder="Example: Paracetamol"
+          value={medicineName}
+          onChange={(e) =>
+            setMedicineName(e.target.value)
+          }
+          style={styles.input}
+        />
+
+        {/* Dosage */}
+        <label>
+          <strong>Dosage</strong>
+        </label>
+
+        <input
+          type="text"
+          placeholder="Example: 500 mg"
+          value={dosage}
+          onChange={(e) =>
+            setDosage(e.target.value)
+          }
+          style={styles.input}
+        />
+
+        {/* Frequency */}
+        <label>
+          <strong>Frequency</strong>
+        </label>
+
+        <select
+          value={frequency}
+          onChange={(e) =>
+            setFrequency(e.target.value)
+          }
+          style={styles.input}
+        >
+          <option value="">
+            Select Frequency
+          </option>
+
+          <option value="Once daily">
+            Once daily
+          </option>
+
+          <option value="Twice daily">
+            Twice daily
+          </option>
+
+          <option value="Three times daily">
+            Three times daily
+          </option>
+
+          <option value="Four times daily">
+            Four times daily
+          </option>
+
+          <option value="As needed">
+            As needed
+          </option>
+        </select>
+
+        {/* Duration */}
+        <label>
+          <strong>Duration</strong>
+        </label>
+
+        <input
+          type="text"
+          placeholder="Example: 5 days"
+          value={duration}
+          onChange={(e) =>
+            setDuration(e.target.value)
+          }
+          style={styles.input}
+        />
+
+        {/* Instructions */}
+        <label>
+          <strong>Instructions</strong>
+        </label>
+
+        <textarea
+          placeholder="Example: Take after meals."
+          value={instructions}
+          onChange={(e) =>
+            setInstructions(e.target.value)
+          }
+          style={styles.textarea}
+        />
+
+        {/* Prescription Date */}
+        <label>
+          <strong>Prescription Date</strong>
+        </label>
+
+        <input
+          type="date"
+          value={prescriptionDate}
+          onChange={(e) =>
+            setPrescriptionDate(e.target.value)
+          }
+          style={styles.input}
+        />
+
+        {/* Save Prescription */}
+        <button
+          onClick={savePrescription}
+          disabled={
+            savingPrescription ||
+            patients.length === 0
+          }
+          style={styles.prescriptionButton}
+        >
+          {savingPrescription
+            ? "Saving..."
+            : "💊 Save Prescription"}
         </button>
 
       </div>
@@ -334,6 +713,7 @@ const styles = {
     padding: "30px",
     borderRadius: "15px",
     maxWidth: "650px",
+    marginBottom: "30px",
     boxShadow:
       "0 8px 25px rgba(0, 0, 0, 0.08)",
     display: "flex",
@@ -366,6 +746,18 @@ const styles = {
 
   saveButton: {
     background: "#2563eb",
+    color: "#fff",
+    border: "none",
+    padding: "12px 20px",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontSize: "16px",
+    fontWeight: "bold",
+    marginTop: "10px",
+  },
+
+  prescriptionButton: {
+    background: "#7c3aed",
     color: "#fff",
     border: "none",
     padding: "12px 20px",

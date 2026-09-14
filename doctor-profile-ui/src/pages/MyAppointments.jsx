@@ -7,6 +7,7 @@ export default function MyAppointments() {
 
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [cancellingId, setCancellingId] = useState(null);
 
   useEffect(() => {
     loadAppointments();
@@ -40,6 +41,7 @@ export default function MyAppointments() {
 
       if (error) {
         console.error("Appointment error:", error);
+        alert(error.message);
         return;
       }
 
@@ -48,9 +50,48 @@ export default function MyAppointments() {
       setAppointments(data || []);
     } catch (error) {
       console.error("Unexpected error:", error);
+      alert("Something went wrong while loading appointments.");
     } finally {
       setLoading(false);
     }
+  }
+
+  async function cancelAppointment(appointmentId) {
+    const confirmed = window.confirm(
+      "Are you sure you want to cancel this appointment?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setCancellingId(appointmentId);
+
+    const { error } = await supabase
+      .from("appointments")
+      .update({
+        status: "Cancelled",
+      })
+      .eq("id", appointmentId);
+
+    if (error) {
+      console.error("Cancel appointment error:", error);
+      alert(error.message);
+      setCancellingId(null);
+      return;
+    }
+
+    alert("Appointment cancelled successfully!");
+
+    setAppointments((currentAppointments) =>
+      currentAppointments.map((appointment) =>
+        appointment.id === appointmentId
+          ? { ...appointment, status: "Cancelled" }
+          : appointment
+      )
+    );
+
+    setCancellingId(null);
   }
 
   return (
@@ -105,10 +146,31 @@ export default function MyAppointments() {
 
               <p>
                 <strong>Status:</strong>{" "}
-                <span style={styles.status}>
+                <span
+                  style={
+                    appointment.status === "Cancelled"
+                      ? styles.cancelledStatus
+                      : styles.status
+                  }
+                >
                   {appointment.status}
                 </span>
               </p>
+
+              {appointment.status !== "Cancelled" &&
+                appointment.status !== "Rejected" && (
+                  <button
+                    onClick={() =>
+                      cancelAppointment(appointment.id)
+                    }
+                    disabled={cancellingId === appointment.id}
+                    style={styles.cancelButton}
+                  >
+                    {cancellingId === appointment.id
+                      ? "Cancelling..."
+                      : "Cancel Appointment"}
+                  </button>
+                )}
             </div>
           ))}
         </div>
@@ -160,6 +222,24 @@ const styles = {
     padding: "5px 10px",
     borderRadius: "20px",
     fontWeight: "bold",
+  },
+
+  cancelledStatus: {
+    background: "#fee2e2",
+    color: "#b91c1c",
+    padding: "5px 10px",
+    borderRadius: "20px",
+    fontWeight: "bold",
+  },
+
+  cancelButton: {
+    background: "#dc2626",
+    color: "#fff",
+    border: "none",
+    padding: "10px 18px",
+    borderRadius: "8px",
+    cursor: "pointer",
+    marginTop: "15px",
   },
 
   empty: {
