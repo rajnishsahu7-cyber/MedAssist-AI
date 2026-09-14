@@ -11,35 +11,24 @@ export default function PatientDashboard() {
 
   return (
     <div style={styles.container}>
-      {/* Header */}
       <header style={styles.header}>
         <h2>🏥 MedAssist</h2>
 
-        <button
-          onClick={handleLogout}
-          style={styles.logout}
-        >
+        <button onClick={handleLogout} style={styles.logout}>
           Logout
         </button>
       </header>
 
-      {/* Welcome */}
-      <h3 style={styles.welcome}>
-        Welcome Patient 👋
-      </h3>
+      <h3 style={styles.welcome}>Welcome Patient 👋</h3>
 
-      {/* Dashboard Cards */}
       <div style={styles.grid}>
-
-        {/* Find a Doctor */}
+        {/* Find Doctor */}
         <div
           style={styles.card}
           onClick={() => navigate("/doctor-search")}
         >
           <h3>🔎 Find a Doctor</h3>
-          <p>
-            Search doctors and view their profiles.
-          </p>
+          <p>Search doctors and view their profiles.</p>
         </div>
 
         {/* Book Appointment */}
@@ -48,9 +37,7 @@ export default function PatientDashboard() {
           onClick={() => navigate("/book")}
         >
           <h3>📅 Book Appointment</h3>
-          <p>
-            Schedule an appointment with a doctor.
-          </p>
+          <p>Schedule an appointment with a doctor.</p>
         </div>
 
         {/* My Appointments */}
@@ -59,35 +46,29 @@ export default function PatientDashboard() {
           onClick={() => navigate("/my-appointments")}
         >
           <h3>📋 My Appointments</h3>
-          <p>
-            View your upcoming and previous appointments.
-          </p>
+          <p>View your upcoming and previous appointments.</p>
         </div>
 
         {/* AI Symptom Checker */}
         <div style={styles.card}>
           <h3>🩺 AI Symptom Checker</h3>
-          <p>
-            Describe your symptoms and get AI suggestions.
-          </p>
+          <p>Describe your symptoms and get AI suggestions.</p>
         </div>
 
         {/* Medical Records */}
-        <div style={styles.card}>
+        <div
+          style={styles.card}
+          onClick={() => navigate("/patient-medical-records")}
+        >
           <h3>📁 Medical Records</h3>
-          <p>
-            View prescriptions and reports.
-          </p>
+          <p>View prescriptions and reports.</p>
         </div>
 
         {/* Chat with Doctor */}
         <div style={styles.card}>
           <h3>💬 Chat with Doctor</h3>
-          <p>
-            Consult your doctor securely.
-          </p>
+          <p>Consult your doctor securely.</p>
         </div>
-
       </div>
     </div>
   );
@@ -104,26 +85,26 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "40px",
-  },
-
-  welcome: {
-    marginBottom: "25px",
+    marginBottom: "30px",
   },
 
   logout: {
     background: "#dc2626",
     color: "#fff",
     border: "none",
-    padding: "10px 20px",
+    padding: "10px 18px",
     borderRadius: "8px",
     cursor: "pointer",
+  },
+
+  welcome: {
+    marginBottom: "25px",
   },
 
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-    gap: "25px",
+    gap: "20px",
   },
 
   card: {
@@ -132,5 +113,6 @@ const styles = {
     borderRadius: "15px",
     boxShadow: "0 8px 25px rgba(0, 0, 0, 0.08)",
     cursor: "pointer",
+    transition: "transform 0.2s",
   },
 };

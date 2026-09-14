@@ -10,6 +10,8 @@ import BookAppointment from "./pages/BookAppointment";
 import MyAppointments from "./pages/MyAppointments";
 import DoctorSearch from "./pages/DoctorSearch";
 import DoctorProfile from "./pages/DoctorProfile";
+import MedicalRecords from "./pages/MedicalRecords";
+import PatientMedicalRecords from "./pages/PatientMedicalRecords";
 
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
@@ -20,6 +22,23 @@ function App() {
       <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+
+      <Route
+        path="/medical-records"
+        element={
+          <RoleProtectedRoute role="doctor">
+            <MedicalRecords />
+          </RoleProtectedRoute>
+         }
+      />
+      <Route
+        path="/patient-medical-records"
+        element={
+          <RoleProtectedRoute role="patient">
+            <PatientMedicalRecords />
+          </RoleProtectedRoute>
+        }
+      />
 
       {/* Patient */}
       <Route
