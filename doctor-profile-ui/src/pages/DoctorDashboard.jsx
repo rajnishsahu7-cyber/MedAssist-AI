@@ -381,13 +381,21 @@ export default function DoctorDashboard() {
       {/* Header */}
       <header style={styles.header}>
         <h2>🏥 MedAssist</h2>
-
-        <button
-          onClick={handleLogout}
-          style={styles.logout}
-        >
-          Logout
-        </button>
+          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            <button
+              onClick={() => navigate("/notifications")}
+              style={styles.notificationsbutton}
+            >
+             🔔 Notifications
+            </button>
+           
+          <button
+            onClick={handleLogout}
+            style={styles.logout}
+          >
+            Logout
+          </button>
+        </div>
       </header>
 
       {/* Welcome */}
@@ -828,6 +836,16 @@ const styles = {
   subtitle: {
     color: "#6b7280",
     marginBottom: "30px",
+  },
+
+  notificationButton: {
+   padding: "10px 20px",
+   border: "none",
+   borderRadius: "8px",
+   backgroundColor: "#eb5625",
+   color: "white",
+   cursor: "pointer",
+   fontWeight: "500",
   },
 
   // =====================================================

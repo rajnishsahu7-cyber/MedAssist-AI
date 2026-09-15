@@ -12,16 +12,25 @@ import DoctorSearch from "./pages/DoctorSearch";
 import DoctorProfile from "./pages/DoctorProfile";
 import MedicalRecords from "./pages/MedicalRecords";
 import PatientMedicalRecords from "./pages/PatientMedicalRecords";
+import Notifications from "./pages/Notifications";
 
+import ProtectedRoute from "./components/ProtectedRoute";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
 function App() {
   return (
     <Routes>
-      {/* Public Routes */}
+
+      {/* ================= PUBLIC ROUTES ================= */}
+
       <Route path="/" element={<Login />} />
+
       <Route path="/login" element={<Login />} />
+
       <Route path="/register" element={<Register />} />
+
+
+      {/* ================= DOCTOR MEDICAL RECORDS ================= */}
 
       <Route
         path="/medical-records"
@@ -29,8 +38,24 @@ function App() {
           <RoleProtectedRoute role="doctor">
             <MedicalRecords />
           </RoleProtectedRoute>
-         }
+        }
       />
+
+
+      {/* ================= NOTIFICATIONS ================= */}
+
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute>
+            <Notifications />
+          </ProtectedRoute>
+        }
+      />
+
+
+      {/* ================= PATIENT MEDICAL RECORDS ================= */}
+
       <Route
         path="/patient-medical-records"
         element={
@@ -40,7 +65,9 @@ function App() {
         }
       />
 
-      {/* Patient */}
+
+      {/* ================= PATIENT ================= */}
+
       <Route
         path="/patient"
         element={
@@ -50,7 +77,9 @@ function App() {
         }
       />
 
-      {/* Doctor */}
+
+      {/* ================= DOCTOR ================= */}
+
       <Route
         path="/doctor"
         element={
@@ -60,7 +89,9 @@ function App() {
         }
       />
 
-      {/* Admin */}
+
+      {/* ================= ADMIN ================= */}
+
       <Route
         path="/admin"
         element={
@@ -70,7 +101,9 @@ function App() {
         }
       />
 
-      {/* Book Appointment */}
+
+      {/* ================= BOOK APPOINTMENT ================= */}
+
       <Route
         path="/book"
         element={
@@ -80,7 +113,9 @@ function App() {
         }
       />
 
-      {/* My Appointments */}
+
+      {/* ================= MY APPOINTMENTS ================= */}
+
       <Route
         path="/my-appointments"
         element={
@@ -90,7 +125,9 @@ function App() {
         }
       />
 
-      {/* Doctor Search */}
+
+      {/* ================= DOCTOR SEARCH ================= */}
+
       <Route
         path="/doctor-search"
         element={
@@ -100,7 +137,9 @@ function App() {
         }
       />
 
-      {/* Doctor Profile */}
+
+      {/* ================= DOCTOR PROFILE ================= */}
+
       <Route
         path="/doctor-profile/:doctorId"
         element={
@@ -109,6 +148,7 @@ function App() {
           </RoleProtectedRoute>
         }
       />
+
     </Routes>
   );
 }
