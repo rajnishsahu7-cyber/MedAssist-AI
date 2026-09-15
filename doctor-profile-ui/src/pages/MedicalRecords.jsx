@@ -8,6 +8,7 @@ export default function MedicalRecords() {
   const [patients, setPatients] = useState([]);
   const [patientId, setPatientId] = useState("");
 
+  // Medical record fields
   const [recordType, setRecordType] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -23,8 +24,13 @@ export default function MedicalRecords() {
   const [instructions, setInstructions] = useState("");
   const [prescriptionDate, setPrescriptionDate] = useState("");
 
+  // Prescription history
+  const [prescriptions, setPrescriptions] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [loadingAppointments, setLoadingAppointments] =
+    useState(false);
+  const [loadingPrescriptions, setLoadingPrescriptions] =
     useState(false);
 
   const [saving, setSaving] = useState(false);
@@ -33,6 +39,7 @@ export default function MedicalRecords() {
 
   useEffect(() => {
     loadPatients();
+    loadPrescriptions();
   }, []);
 
   // =====================================================
@@ -313,7 +320,67 @@ export default function MedicalRecords() {
     setPrescriptionDate("");
 
     setSavingPrescription(false);
+
+    // Refresh prescription history
+    loadPrescriptions();
   }
+
+  // =====================================================
+  // LOAD DOCTOR PRESCRIPTIONS
+  // =====================================================
+
+  async function loadPrescriptions() {
+    setLoadingPrescriptions(true);
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      navigate("/");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("prescriptions")
+      .select(`
+        id,
+        patient_id,
+        medicine_name,
+        dosage,
+        frequency,
+        duration,
+        instructions,
+        prescription_date,
+        created_at,
+        profiles:patient_id (
+          full_name,
+          email
+        )
+      `)
+      .eq("doctor_id", session.user.id)
+      .order("prescription_date", {
+        ascending: false,
+      });
+
+    if (error) {
+      console.error(
+        "Prescription loading error:",
+        error
+      );
+
+      alert(error.message);
+      setLoadingPrescriptions(false);
+      return;
+    }
+
+    setPrescriptions(data || []);
+    setLoadingPrescriptions(false);
+  }
+
+  // =====================================================
+  // PAGE
+  // =====================================================
 
   return (
     <div style={styles.container}>
@@ -685,6 +752,121 @@ export default function MedicalRecords() {
 
       </div>
 
+      {/* =================================================
+          PRESCRIPTION HISTORY
+      ================================================= */}
+
+      <div style={styles.listSection}>
+
+        <div style={styles.listHeader}>
+
+          <div>
+            <h2>📋 Prescription History</h2>
+
+            <p style={styles.listSubtitle}>
+              View prescriptions previously created
+              for your patients.
+            </p>
+          </div>
+
+          <button
+            onClick={loadPrescriptions}
+            style={styles.refreshButton}
+          >
+            🔄 Refresh
+          </button>
+
+        </div>
+
+        {loadingPrescriptions ? (
+          <div style={styles.empty}>
+            <p>Loading prescriptions...</p>
+          </div>
+        ) : prescriptions.length === 0 ? (
+          <div style={styles.empty}>
+            <h3>No prescriptions found</h3>
+
+            <p>
+              Prescriptions you create will appear
+              here.
+            </p>
+          </div>
+        ) : (
+          <div style={styles.prescriptionGrid}>
+
+            {prescriptions.map((prescription) => (
+              <div
+                key={prescription.id}
+                style={styles.prescriptionCard}
+              >
+
+                <div style={styles.prescriptionHeader}>
+
+                  <h3>
+                    💊 {prescription.medicine_name}
+                  </h3>
+
+                  <span style={styles.prescriptionBadge}>
+                    Prescription
+                  </span>
+
+                </div>
+
+                <p>
+                  <strong>Patient:</strong>{" "}
+                  {prescription.profiles?.full_name ||
+                    "Unknown"}
+                </p>
+
+                {prescription.profiles?.email && (
+                  <p>
+                    <strong>Email:</strong>{" "}
+                    {prescription.profiles.email}
+                  </p>
+                )}
+
+                <hr style={styles.divider} />
+
+                <p>
+                  <strong>Dosage:</strong>{" "}
+                  {prescription.dosage}
+                </p>
+
+                <p>
+                  <strong>Frequency:</strong>{" "}
+                  {prescription.frequency}
+                </p>
+
+                <p>
+                  <strong>Duration:</strong>{" "}
+                  {prescription.duration}
+                </p>
+
+                {prescription.instructions && (
+                  <div style={styles.instructions}>
+                    <strong>Instructions:</strong>
+
+                    <p>
+                      {prescription.instructions}
+                    </p>
+                  </div>
+                )}
+
+                <p style={styles.dateText}>
+                  <strong>
+                    Prescription Date:
+                  </strong>{" "}
+                  {prescription.prescription_date}
+                </p>
+
+              </div>
+            ))}
+
+          </div>
+        )}
+
+      </div>
+
     </div>
   );
 }
@@ -782,5 +964,92 @@ const styles = {
     padding: "15px",
     borderRadius: "8px",
     marginBottom: "15px",
+  },
+
+  // =====================================================
+  // PRESCRIPTION HISTORY STYLES
+  // =====================================================
+
+  listSection: {
+    background: "#fff",
+    padding: "30px",
+    borderRadius: "15px",
+    marginBottom: "30px",
+    boxShadow:
+      "0 8px 25px rgba(0, 0, 0, 0.08)",
+  },
+
+  listHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: "20px",
+    marginBottom: "25px",
+  },
+
+  listSubtitle: {
+    color: "#6b7280",
+    marginTop: "5px",
+  },
+
+  refreshButton: {
+    background: "#374151",
+    color: "#fff",
+    border: "none",
+    padding: "10px 18px",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  },
+
+  prescriptionGrid: {
+    display: "grid",
+    gridTemplateColumns:
+      "repeat(auto-fit, minmax(320px, 1fr))",
+    gap: "20px",
+  },
+
+  prescriptionCard: {
+    border: "1px solid #e5e7eb",
+    borderRadius: "12px",
+    padding: "20px",
+    background: "#fafafa",
+  },
+
+  prescriptionHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: "10px",
+    marginBottom: "15px",
+  },
+
+  prescriptionBadge: {
+    background: "#ede9fe",
+    color: "#6d28d9",
+    padding: "5px 10px",
+    borderRadius: "20px",
+    fontSize: "12px",
+    fontWeight: "bold",
+    whiteSpace: "nowrap",
+  },
+
+  instructions: {
+    background: "#f3f4f6",
+    padding: "12px",
+    borderRadius: "8px",
+    marginTop: "15px",
+    marginBottom: "15px",
+  },
+
+  divider: {
+    border: "none",
+    borderTop: "1px solid #e5e7eb",
+    margin: "15px 0",
+  },
+
+  dateText: {
+    color: "#6b7280",
+    marginTop: "15px",
   },
 };
