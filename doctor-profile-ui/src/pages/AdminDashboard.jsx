@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../supabase/client";
 import { getDashboardStatistics } from "../services/dashboardService";
 
 function AdminDashboard() {
+  const navigate = useNavigate();
+
   const [stats, setStats] = useState({
     totalDoctors: 0,
     totalPatients: 0,
@@ -37,42 +41,51 @@ function AdminDashboard() {
     loadDashboard();
   }, []);
 
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    navigate("/");
+  }
+
   return (
     <div style={styles.page}>
-      {/* Header */}
+      {/* HEADER */}
       <header style={styles.header}>
         <div>
           <h1 style={styles.title}>🏥 MedAssist</h1>
+
           <p style={styles.subtitle}>
             Hospital Administration Dashboard
           </p>
         </div>
 
-        <button style={styles.logoutButton}>
+        <button
+          onClick={handleLogout}
+          style={styles.logoutButton}
+        >
           Logout
         </button>
       </header>
 
-      {/* Welcome Section */}
+      {/* WELCOME */}
       <section style={styles.welcomeSection}>
         <h2>Welcome, Admin 👋</h2>
 
         <p>
-          Monitor hospital activity, appointments, patients, doctors,
-          and revenue from one place.
+          Monitor hospital activity, appointments, patients,
+          doctors, and revenue from one place.
         </p>
       </section>
 
-      {/* Error Message */}
+      {/* ERROR */}
       {error && (
         <div style={styles.errorBox}>
           {error}
         </div>
       )}
 
-      {/* Statistics Cards */}
+      {/* MAIN KPI CARDS */}
       <section style={styles.statsGrid}>
-        {/* Doctors */}
+        {/* DOCTORS */}
         <div style={styles.card}>
           <div style={styles.cardIcon}>👨‍⚕️</div>
 
@@ -87,7 +100,7 @@ function AdminDashboard() {
           </span>
         </div>
 
-        {/* Patients */}
+        {/* PATIENTS */}
         <div style={styles.card}>
           <div style={styles.cardIcon}>👥</div>
 
@@ -102,7 +115,7 @@ function AdminDashboard() {
           </span>
         </div>
 
-        {/* Appointments */}
+        {/* APPOINTMENTS */}
         <div style={styles.card}>
           <div style={styles.cardIcon}>📅</div>
 
@@ -117,7 +130,7 @@ function AdminDashboard() {
           </span>
         </div>
 
-        {/* Revenue */}
+        {/* REVENUE */}
         <div style={styles.card}>
           <div style={styles.cardIcon}>💰</div>
 
@@ -133,54 +146,122 @@ function AdminDashboard() {
         </div>
       </section>
 
-      {/* Appointment + Revenue Sections */}
+      {/* APPOINTMENT + REVENUE */}
       <section style={styles.sectionGrid}>
-        {/* Appointment Overview */}
+        {/* APPOINTMENT STATISTICS */}
         <div style={styles.panel}>
           <h2>📊 Appointment Overview</h2>
 
-          <div style={styles.appointmentRow}>
-            <span>Pending</span>
+          <p style={styles.panelDescription}>
+            Current appointment status statistics
+          </p>
 
-            <strong>
-              {loading ? "..." : stats.pendingAppointments}
-            </strong>
-          </div>
+          <div style={styles.appointmentStatsGrid}>
+            {/* TOTAL */}
+            <div style={styles.appointmentStatCard}>
+              <span style={styles.statIcon}>
+                📋
+              </span>
 
-          <div style={styles.appointmentRow}>
-            <span>Accepted</span>
+              <span style={styles.statLabel}>
+                Total
+              </span>
 
-            <strong>
-              {loading ? "..." : stats.acceptedAppointments}
-            </strong>
-          </div>
+              <strong style={styles.statNumber}>
+                {loading
+                  ? "..."
+                  : stats.totalAppointments}
+              </strong>
+            </div>
 
-          <div style={styles.appointmentRow}>
-            <span>Completed</span>
+            {/* PENDING */}
+            <div style={styles.appointmentStatCard}>
+              <span style={styles.statIcon}>
+                ⏳
+              </span>
 
-            <strong>
-              {loading ? "..." : stats.completedAppointments}
-            </strong>
-          </div>
+              <span style={styles.statLabel}>
+                Pending
+              </span>
 
-          <div style={styles.appointmentRow}>
-            <span>Cancelled</span>
+              <strong style={styles.statNumber}>
+                {loading
+                  ? "..."
+                  : stats.pendingAppointments}
+              </strong>
+            </div>
 
-            <strong>
-              {loading ? "..." : stats.cancelledAppointments}
-            </strong>
-          </div>
+            {/* ACCEPTED */}
+            <div style={styles.appointmentStatCard}>
+              <span style={styles.statIcon}>
+                ✅
+              </span>
 
-          <div style={styles.appointmentRow}>
-            <span>Rejected</span>
+              <span style={styles.statLabel}>
+                Accepted
+              </span>
 
-            <strong>
-              {loading ? "..." : stats.rejectedAppointments}
-            </strong>
+              <strong style={styles.statNumber}>
+                {loading
+                  ? "..."
+                  : stats.acceptedAppointments}
+              </strong>
+            </div>
+
+            {/* COMPLETED */}
+            <div style={styles.appointmentStatCard}>
+              <span style={styles.statIcon}>
+                🏁
+              </span>
+
+              <span style={styles.statLabel}>
+                Completed
+              </span>
+
+              <strong style={styles.statNumber}>
+                {loading
+                  ? "..."
+                  : stats.completedAppointments}
+              </strong>
+            </div>
+
+            {/* CANCELLED */}
+            <div style={styles.appointmentStatCard}>
+              <span style={styles.statIcon}>
+                ❌
+              </span>
+
+              <span style={styles.statLabel}>
+                Cancelled
+              </span>
+
+              <strong style={styles.statNumber}>
+                {loading
+                  ? "..."
+                  : stats.cancelledAppointments}
+              </strong>
+            </div>
+
+            {/* REJECTED */}
+            <div style={styles.appointmentStatCard}>
+              <span style={styles.statIcon}>
+                🚫
+              </span>
+
+              <span style={styles.statLabel}>
+                Rejected
+              </span>
+
+              <strong style={styles.statNumber}>
+                {loading
+                  ? "..."
+                  : stats.rejectedAppointments}
+              </strong>
+            </div>
           </div>
         </div>
 
-        {/* Revenue Summary */}
+        {/* REVENUE SUMMARY */}
         <div style={styles.panel}>
           <h2>💰 Revenue Summary</h2>
 
@@ -195,23 +276,27 @@ function AdminDashboard() {
           <div style={styles.revenueBox}>
             <span>This Month</span>
 
-            <strong>₹0</strong>
+            <strong>
+              ₹0
+            </strong>
           </div>
 
           <div style={styles.revenueBox}>
             <span>Today</span>
 
-            <strong>₹0</strong>
+            <strong>
+              ₹0
+            </strong>
           </div>
 
           <p style={styles.revenueNote}>
-            Revenue data will be connected after the payment
-            system is implemented.
+            Revenue data will be connected after the
+            payment system is implemented.
           </p>
         </div>
       </section>
 
-      {/* Quick Actions */}
+      {/* QUICK ACTIONS */}
       <section style={styles.panel}>
         <h2>⚡ Quick Actions</h2>
 
@@ -236,6 +321,10 @@ function AdminDashboard() {
     </div>
   );
 }
+
+/* =========================
+   STYLES
+========================= */
 
 const styles = {
   page: {
@@ -320,7 +409,7 @@ const styles = {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
     gap: "20px",
-    padding: "0 40px 0",
+    padding: "0 40px",
   },
 
   panel: {
@@ -331,12 +420,48 @@ const styles = {
     boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
   },
 
-  appointmentRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    padding: "14px 0",
-    borderBottom: "1px solid #e5e7eb",
+  panelDescription: {
+    color: "#6b7280",
+    fontSize: "14px",
+    marginTop: "-8px",
+    marginBottom: "20px",
   },
+
+  /* APPOINTMENT STATISTICS */
+
+  appointmentStatsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: "15px",
+    marginTop: "20px",
+  },
+
+  appointmentStatCard: {
+    padding: "18px",
+    backgroundColor: "#f9fafb",
+    borderRadius: "10px",
+    border: "1px solid #e5e7eb",
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+  },
+
+  statIcon: {
+    fontSize: "22px",
+  },
+
+  statLabel: {
+    color: "#6b7280",
+    fontSize: "14px",
+    fontWeight: "600",
+  },
+
+  statNumber: {
+    fontSize: "26px",
+    color: "#2563eb",
+  },
+
+  /* REVENUE */
 
   revenueBox: {
     display: "flex",
@@ -352,6 +477,8 @@ const styles = {
     color: "#6b7280",
     fontSize: "13px",
   },
+
+  /* QUICK ACTIONS */
 
   actionsGrid: {
     display: "grid",
