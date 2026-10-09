@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabase/client";
@@ -28,7 +29,6 @@ function AdminDashboard() {
         setError("");
 
         const data = await getDashboardStatistics();
-
         setStats(data);
       } catch (error) {
         console.error("Dashboard Service Error:", error);
@@ -52,7 +52,6 @@ function AdminDashboard() {
       <header style={styles.header}>
         <div>
           <h1 style={styles.title}>🏥 MedAssist</h1>
-
           <p style={styles.subtitle}>
             Hospital Administration Dashboard
           </p>
@@ -69,7 +68,6 @@ function AdminDashboard() {
       {/* WELCOME */}
       <section style={styles.welcomeSection}>
         <h2>Welcome, Admin 👋</h2>
-
         <p>
           Monitor hospital activity, appointments, patients,
           doctors, and revenue from one place.
@@ -88,13 +86,10 @@ function AdminDashboard() {
         {/* DOCTORS */}
         <div style={styles.card}>
           <div style={styles.cardIcon}>👨‍⚕️</div>
-
           <h3>Total Doctors</h3>
-
           <p style={styles.number}>
             {loading ? "..." : stats.totalDoctors}
           </p>
-
           <span style={styles.cardText}>
             Registered doctors
           </span>
@@ -103,13 +98,10 @@ function AdminDashboard() {
         {/* PATIENTS */}
         <div style={styles.card}>
           <div style={styles.cardIcon}>👥</div>
-
           <h3>Total Patients</h3>
-
           <p style={styles.number}>
             {loading ? "..." : stats.totalPatients}
           </p>
-
           <span style={styles.cardText}>
             Registered patients
           </span>
@@ -118,13 +110,10 @@ function AdminDashboard() {
         {/* APPOINTMENTS */}
         <div style={styles.card}>
           <div style={styles.cardIcon}>📅</div>
-
           <h3>Appointments</h3>
-
           <p style={styles.number}>
             {loading ? "..." : stats.totalAppointments}
           </p>
-
           <span style={styles.cardText}>
             Total appointments
           </span>
@@ -133,15 +122,12 @@ function AdminDashboard() {
         {/* REVENUE */}
         <div style={styles.card}>
           <div style={styles.cardIcon}>💰</div>
-
           <h3>Revenue</h3>
-
           <p style={styles.number}>
-            ₹{loading ? "..." : stats.totalRevenue}
+            {loading ? "..." : "Not available"}
           </p>
-
           <span style={styles.cardText}>
-            Revenue available
+            Payment system not connected
           </span>
         </div>
       </section>
@@ -159,103 +145,55 @@ function AdminDashboard() {
           <div style={styles.appointmentStatsGrid}>
             {/* TOTAL */}
             <div style={styles.appointmentStatCard}>
-              <span style={styles.statIcon}>
-                📋
-              </span>
-
-              <span style={styles.statLabel}>
-                Total
-              </span>
-
+              <span style={styles.statIcon}>📋</span>
+              <span style={styles.statLabel}>Total</span>
               <strong style={styles.statNumber}>
-                {loading
-                  ? "..."
-                  : stats.totalAppointments}
+                {loading ? "..." : stats.totalAppointments}
               </strong>
             </div>
 
             {/* PENDING */}
             <div style={styles.appointmentStatCard}>
-              <span style={styles.statIcon}>
-                ⏳
-              </span>
-
-              <span style={styles.statLabel}>
-                Pending
-              </span>
-
+              <span style={styles.statIcon}>⏳</span>
+              <span style={styles.statLabel}>Pending</span>
               <strong style={styles.statNumber}>
-                {loading
-                  ? "..."
-                  : stats.pendingAppointments}
+                {loading ? "..." : stats.pendingAppointments}
               </strong>
             </div>
 
             {/* ACCEPTED */}
             <div style={styles.appointmentStatCard}>
-              <span style={styles.statIcon}>
-                ✅
-              </span>
-
-              <span style={styles.statLabel}>
-                Accepted
-              </span>
-
+              <span style={styles.statIcon}>✅</span>
+              <span style={styles.statLabel}>Accepted</span>
               <strong style={styles.statNumber}>
-                {loading
-                  ? "..."
-                  : stats.acceptedAppointments}
+                {loading ? "..." : stats.acceptedAppointments}
               </strong>
             </div>
 
             {/* COMPLETED */}
             <div style={styles.appointmentStatCard}>
-              <span style={styles.statIcon}>
-                🏁
-              </span>
-
-              <span style={styles.statLabel}>
-                Completed
-              </span>
-
+              <span style={styles.statIcon}>🏁</span>
+              <span style={styles.statLabel}>Completed</span>
               <strong style={styles.statNumber}>
-                {loading
-                  ? "..."
-                  : stats.completedAppointments}
+                {loading ? "..." : stats.completedAppointments}
               </strong>
             </div>
 
             {/* CANCELLED */}
             <div style={styles.appointmentStatCard}>
-              <span style={styles.statIcon}>
-                ❌
-              </span>
-
-              <span style={styles.statLabel}>
-                Cancelled
-              </span>
-
+              <span style={styles.statIcon}>❌</span>
+              <span style={styles.statLabel}>Cancelled</span>
               <strong style={styles.statNumber}>
-                {loading
-                  ? "..."
-                  : stats.cancelledAppointments}
+                {loading ? "..." : stats.cancelledAppointments}
               </strong>
             </div>
 
             {/* REJECTED */}
             <div style={styles.appointmentStatCard}>
-              <span style={styles.statIcon}>
-                🚫
-              </span>
-
-              <span style={styles.statLabel}>
-                Rejected
-              </span>
-
+              <span style={styles.statIcon}>🚫</span>
+              <span style={styles.statLabel}>Rejected</span>
               <strong style={styles.statNumber}>
-                {loading
-                  ? "..."
-                  : stats.rejectedAppointments}
+                {loading ? "..." : stats.rejectedAppointments}
               </strong>
             </div>
           </div>
@@ -267,31 +205,30 @@ function AdminDashboard() {
 
           <div style={styles.revenueBox}>
             <span>Total Revenue</span>
-
             <strong>
-              ₹{loading ? "..." : stats.totalRevenue}
+              {loading ? "..." : "Not available"}
             </strong>
           </div>
 
           <div style={styles.revenueBox}>
             <span>This Month</span>
-
             <strong>
-              ₹0
+              {loading ? "..." : "Not available"}
             </strong>
           </div>
 
           <div style={styles.revenueBox}>
             <span>Today</span>
-
             <strong>
-              ₹0
+              {loading ? "..." : "Not available"}
             </strong>
           </div>
 
           <p style={styles.revenueNote}>
-            Revenue data will be connected after the
-            payment system is implemented.
+            Revenue reporting is currently unavailable because
+            the payment system has not been connected. Revenue
+            figures will appear once verified payment data is
+            available.
           </p>
         </div>
       </section>
@@ -428,7 +365,6 @@ const styles = {
   },
 
   /* APPOINTMENT STATISTICS */
-
   appointmentStatsGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(3, 1fr)",
@@ -462,10 +398,10 @@ const styles = {
   },
 
   /* REVENUE */
-
   revenueBox: {
     display: "flex",
     justifyContent: "space-between",
+    gap: "12px",
     padding: "16px",
     marginTop: "12px",
     backgroundColor: "#f9fafb",
@@ -476,10 +412,10 @@ const styles = {
     marginTop: "15px",
     color: "#6b7280",
     fontSize: "13px",
+    lineHeight: "1.6",
   },
 
   /* QUICK ACTIONS */
-
   actionsGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(4, 1fr)",

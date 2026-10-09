@@ -96,8 +96,7 @@ export async function getDashboardStatistics() {
     cancelledAppointments: appointmentStatistics.cancelled,
     rejectedAppointments: appointmentStatistics.rejected,
 
-    // Revenue is not available yet because the current
-    // database does not have a valid payment/revenue source.
-    totalRevenue: 0,
+    // Revenue is unavailable until a verified payment source is connected.
+    totalRevenue: null,
   };
 }
