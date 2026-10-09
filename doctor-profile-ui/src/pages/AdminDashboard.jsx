@@ -16,7 +16,7 @@ function AdminDashboard() {
     completedAppointments: 0,
     cancelledAppointments: 0,
     rejectedAppointments: 0,
-    totalRevenue: 0,
+    totalRevenue: null,
   });
 
   const [loading, setLoading] = useState(true);
@@ -44,6 +44,31 @@ function AdminDashboard() {
   async function handleLogout() {
     await supabase.auth.signOut();
     navigate("/");
+  }
+
+  // Quick Action handlers
+  function handleManageDoctors() {
+    window.alert(
+      "Manage Doctors: The admin doctor management page is not available yet."
+    );
+  }
+
+  function handleManagePatients() {
+    window.alert(
+      "Manage Patients: The admin patient management page is not available yet."
+    );
+  }
+
+  function handleViewAppointments() {
+    window.alert(
+      "View Appointments: The admin appointment management page is not available yet."
+    );
+  }
+
+  function handleViewRevenue() {
+    window.alert(
+      "View Revenue: The payment system is not connected yet."
+    );
   }
 
   return (
@@ -238,19 +263,35 @@ function AdminDashboard() {
         <h2>⚡ Quick Actions</h2>
 
         <div style={styles.actionsGrid}>
-          <button style={styles.actionButton}>
+          <button
+            type="button"
+            style={styles.actionButton}
+            onClick={handleManageDoctors}
+          >
             👨‍⚕️ Manage Doctors
           </button>
 
-          <button style={styles.actionButton}>
+          <button
+            type="button"
+            style={styles.actionButton}
+            onClick={handleManagePatients}
+          >
             👥 Manage Patients
           </button>
 
-          <button style={styles.actionButton}>
+          <button
+            type="button"
+            style={styles.actionButton}
+            onClick={handleViewAppointments}
+          >
             📅 View Appointments
           </button>
 
-          <button style={styles.actionButton}>
+          <button
+            type="button"
+            style={styles.actionButton}
+            onClick={handleViewRevenue}
+          >
             💰 View Revenue
           </button>
         </div>
